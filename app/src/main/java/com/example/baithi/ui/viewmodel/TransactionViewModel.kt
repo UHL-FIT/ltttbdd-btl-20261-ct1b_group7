@@ -29,9 +29,28 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
             repository.getAllTransactions(),
             repository.getAllCategories()
         ) { transactions, categories ->
-            _uiState.update { it.copy(categories = categories) }
-            calculateStats(transactions, categories)
+            _uiState.update { it.copy(categories = categories, allTransactions = transactions) }
+            filterAndCalculateStats()
         }.launchIn(viewModelScope)
+    }
+
+    fun onMonthYearSelected(month: Int, year: Int) {
+        _uiState.update { it.copy(selectedMonth = month, selectedYear = year) }
+        filterAndCalculateStats()
+    }
+
+    private fun filterAndCalculateStats() {
+        val state = _uiState.value
+        val calendar = java.util.Calendar.getInstance()
+        
+        val filteredTransactions = state.allTransactions.filter { t ->
+            calendar.timeInMillis = t.date
+            val m = calendar.get(java.util.Calendar.MONTH)
+            val y = calendar.get(java.util.Calendar.YEAR)
+            m == state.selectedMonth && y == state.selectedYear
+        }
+
+        calculateStats(filteredTransactions, state.categories)
     }
 
     private fun calculateStats(transactions: List<Transaction>, categories: List<Category>) {
