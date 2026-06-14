@@ -2,6 +2,7 @@ package com.example.baithi.ui.screens.stats
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -42,13 +43,12 @@ fun StatsContent(
     val years = (currentYear - 5..currentYear + 5).toList()
 
     Scaffold(
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             CenterAlignedTopAppBar(
                 title = { 
                     Text(
                         "Thống kê báo cáo",
-                        color = Color.White,
                         fontWeight = FontWeight.Bold
                     ) 
                 },
@@ -56,21 +56,20 @@ fun StatsContent(
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.Default.ArrowBack, 
-                            contentDescription = "Back",
-                            tint = Color.White
+                            contentDescription = "Back"
                         )
                     }
                 },
                 actions = {
                     TextButton(onClick = onDeleteAll) {
-                        Text("Xoá tất cả", color = Color.White)
+                        Text("Xoá tất cả", color = MaterialTheme.colorScheme.onPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color(0xFF03A9F4),
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White,
-                    actionIconContentColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         }
@@ -88,8 +87,10 @@ fun StatsContent(
             if (uiState.totalExpense > uiState.monthlyBudget) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE)),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.Red)
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    ),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.error)
                 ) {
                     Row(
                         modifier = Modifier.padding(12.dp),
@@ -98,13 +99,13 @@ fun StatsContent(
                         Icon(
                             imageVector = Icons.Default.Warning,
                             contentDescription = null,
-                            tint = Color.Red,
+                            tint = MaterialTheme.colorScheme.error,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
                             "Cảnh báo: Bạn đã vượt ngân sách chi tiêu tháng này (${String.format("%,.0f đ", uiState.monthlyBudget)})!",
-                            color = Color.Red,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp
                         )
@@ -115,7 +116,9 @@ fun StatsContent(
             // Bộ chọn tháng
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFE1F5FE)),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                ),
                 onClick = { showMonthPicker = true }
             ) {
                 Row(
@@ -127,9 +130,13 @@ fun StatsContent(
                         text = "${months[uiState.selectedMonth]} - Năm ${uiState.selectedYear}",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF0288D1)
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
-                    Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color(0xFF0288D1))
+                    Icon(
+                        Icons.Default.ArrowDropDown, 
+                        contentDescription = null, 
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                 }
             }
 
@@ -155,7 +162,7 @@ fun StatsContent(
                                                         .fillMaxWidth()
                                                         .clickable { tempYear = year }
                                                         .padding(8.dp),
-                                                    color = if (tempYear == year) Color(0xFF03A9F4) else Color.Black,
+                                                    color = if (tempYear == year) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                                                     fontWeight = if (tempYear == year) FontWeight.Bold else FontWeight.Normal
                                                 )
                                             }
@@ -174,7 +181,7 @@ fun StatsContent(
                                                         .fillMaxWidth()
                                                         .clickable { tempMonth = index }
                                                         .padding(8.dp),
-                                                    color = if (tempMonth == index) Color(0xFF03A9F4) else Color.Black,
+                                                    color = if (tempMonth == index) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                                                     fontWeight = if (tempMonth == index) FontWeight.Bold else FontWeight.Normal
                                                 )
                                             }
@@ -233,12 +240,12 @@ fun StatsContent(
                                                 Text(
                                                     category?.name ?: "Khác", 
                                                     fontSize = 12.sp, 
-                                                    color = Color.Gray
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
                                             }
                                             Text(
                                                 text = "${if (isExpense) "-" else "+"}${String.format("%,.0f đ", transaction.amount)}",
-                                                color = if (isExpense) Color.Red else Color(0xFF2E7D32),
+                                                color = if (isExpense) MaterialTheme.colorScheme.error else Color(0xFF2E7D32),
                                                 fontWeight = FontWeight.Bold
                                             )
                                         }
@@ -259,16 +266,16 @@ fun StatsContent(
             }
             StatItem("Trung bình tháng", String.format("%,.0f đ", uiState.avgTransaction))
             StatItem("Lớn nhất tháng", String.format("%,.0f đ", uiState.maxTransaction), Color(0xFF2E7D32))
-            StatItem("Nhỏ nhất tháng", String.format("%,.0f đ", uiState.minTransaction), Color.Red)
+            StatItem("Nhỏ nhất tháng", String.format("%,.0f đ", uiState.minTransaction), MaterialTheme.colorScheme.error)
             
-            HorizontalDivider(color = Color(0xFF03A9F4).copy(alpha = 0.5f))
+            HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
             
             Text(
                 "Cơ cấu thu chi tháng", 
                 modifier = Modifier.fillMaxWidth(),
                 fontSize = 18.sp, 
                 fontWeight = FontWeight.Bold, 
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             // Biểu đồ tròn
@@ -285,7 +292,7 @@ fun StatsContent(
             } else {
                 Text(
                     "Không có dữ liệu trong tháng này", 
-                    color = Color.Gray, 
+                    color = MaterialTheme.colorScheme.onSurfaceVariant, 
                     fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
                     modifier = Modifier.padding(vertical = 32.dp)
                 )
@@ -296,17 +303,17 @@ fun StatsContent(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Surface(modifier = Modifier.size(12.dp), color = Color(0xFF2E7D32)) {}
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Thu nhập", color = Color.Black)
+                        Text("Thu nhập", color = MaterialTheme.colorScheme.onBackground)
                     }
                     Text(String.format("%,.0f đ", uiState.totalIncome), color = Color(0xFF2E7D32), fontWeight = FontWeight.Bold)
                 }
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Surface(modifier = Modifier.size(12.dp), color = Color.Red) {}
+                        Surface(modifier = Modifier.size(12.dp), color = MaterialTheme.colorScheme.error) {}
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Chi tiêu", color = Color.Black)
+                        Text("Chi tiêu", color = MaterialTheme.colorScheme.onBackground)
                     }
-                    Text(String.format("%,.0f đ", uiState.totalExpense), color = Color.Red, fontWeight = FontWeight.Bold)
+                    Text(String.format("%,.0f đ", uiState.totalExpense), color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -320,17 +327,20 @@ fun SimplePieChart(income: Float, expense: Float) {
 
     val incomeAngle = (income / total) * 360f
     val expenseAngle = (expense / total) * 360f
+    
+    val incomeColor = Color(0xFF2E7D32)
+    val expenseColor = MaterialTheme.colorScheme.error
 
     Canvas(modifier = Modifier.fillMaxSize()) {
         drawArc(
-            color = Color(0xFF2E7D32),
+            color = incomeColor,
             startAngle = -90f,
             sweepAngle = incomeAngle,
             useCenter = true,
             size = Size(size.width, size.height)
         )
         drawArc(
-            color = Color.Red,
+            color = expenseColor,
             startAngle = -90f + incomeAngle,
             sweepAngle = expenseAngle,
             useCenter = true,
@@ -383,7 +393,7 @@ private val mockTransaction = com.example.baithi.data.local.entities.Transaction
 fun StatItem(
     label: String, 
     value: String, 
-    valueColor: Color = Color.Black,
+    valueColor: Color = MaterialTheme.colorScheme.onSurface,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -391,7 +401,7 @@ fun StatItem(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label, color = Color.Black, fontSize = 16.sp)
+        Text(label, color = MaterialTheme.colorScheme.onSurface, fontSize = 16.sp)
         Text(value, fontWeight = FontWeight.Bold, color = valueColor, fontSize = 18.sp)
     }
 }

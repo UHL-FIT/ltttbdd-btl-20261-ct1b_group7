@@ -1,6 +1,7 @@
 package com.example.baithi.ui.screens.home
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -46,19 +47,19 @@ fun ManHinhChinhContent(
     onXoaGiaoDich: (Transaction) -> Unit,
 ) {
     Scaffold(
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Quản lí chi tiêu", color = Color.White, fontWeight = FontWeight.Bold) },
+                title = { Text("Quản lí chi tiêu", fontWeight = FontWeight.Bold) },
                 actions = {
                     IconButton(onClick = onXuatDuLieu) {
-                        Icon(Icons.Default.UploadFile, contentDescription = "Xuất JSON", tint = Color.White)
+                        Icon(Icons.Default.UploadFile, contentDescription = "Xuất JSON")
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color(0xFF03A9F4),
-                    titleContentColor = Color.White,
-                    actionIconContentColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         },
@@ -102,7 +103,7 @@ fun ManHinhChinhContent(
                 modifier = Modifier.padding(16.dp),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             if (uiState.transactions.isEmpty()) {
@@ -118,13 +119,13 @@ fun ManHinhChinhContent(
                         imageVector = Icons.Default.AccountBalanceWallet,
                         contentDescription = null,
                         modifier = Modifier.size(100.dp),
-                        tint = Color(0xFF03A9F4).copy(alpha = 0.3f)
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = "Bạn chưa có giao dịch nào bấm dấu \"+\" để thêm",
                         style = TextStyle(fontStyle = FontStyle.Italic),
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.onBackground,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -154,7 +155,7 @@ fun ManHinhChinhContent(
                     .padding(8.dp),
                 textAlign = TextAlign.Center,
                 fontSize = 12.sp,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
             )
         }
     }
@@ -221,9 +222,9 @@ fun TheTongQuan(thuNhap: Double, chiTieu: Double, soDu: Double) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = BorderStroke(1.dp, Color(0xFF03A9F4).copy(alpha = 0.5f)),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)),
         shape = RoundedCornerShape(8.dp)
     ) {
         Column(
@@ -234,14 +235,14 @@ fun TheTongQuan(thuNhap: Double, chiTieu: Double, soDu: Double) {
                 text = "Số dư hiện tại",
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = String.format(Locale.getDefault(), "%,.0f đ", soDu),
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onSurface
             )
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -257,12 +258,12 @@ fun TheTongQuan(thuNhap: Double, chiTieu: Double, soDu: Double) {
 @Composable
 fun SummaryItem(label: String, value: Double, isPercent: Boolean = false) {
     Column {
-        Text(label, fontSize = 13.sp, color = Color.Black)
+        Text(label, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
         Text(
             if (isPercent) String.format("%.1f%%", value) else String.format(Locale.getDefault(), "%,.0f", value),
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
-            color = Color.Black
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -276,16 +277,22 @@ fun DongGiaoDich(
 ) {
     val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     val isExpense = category?.isExpense ?: true
-    val color = if (isExpense) Color.Red else Color(0xFF03A9F4)
-    val iconBgColor = if (isExpense) Color(0xFFFFEBEE) else Color(0xFFE1F5FE)
+    
+    val amountColor = if (isExpense) MaterialTheme.colorScheme.error else Color(0xFF2E7D32)
+    val iconColor = if (isExpense) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+    val iconBgColor = if (isExpense) {
+        MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f)
+    } else {
+        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+    }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         onClick = onClick,
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, Color(0xFF03A9F4)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
@@ -305,7 +312,7 @@ fun DongGiaoDich(
                     Icon(
                         imageVector = if (isExpense) Icons.Default.BarChart else Icons.Default.AccountBalanceWallet,
                         contentDescription = null,
-                        tint = color,
+                        tint = iconColor,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -318,12 +325,12 @@ fun DongGiaoDich(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(transaction.title, fontSize = 18.sp, color = Color.Black, fontWeight = FontWeight.Medium)
+                    Text(transaction.title, fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Medium)
                     Text(
                         text = String.format(Locale.getDefault(), "%,.0f đ", transaction.amount),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (isExpense) Color.Red else Color(0xFF03A9F4)
+                        color = amountColor
                     )
                 }
                 
@@ -332,12 +339,17 @@ fun DongGiaoDich(
                 Text(
                     text = "${category?.name ?: "Khác"} • ${sdf.format(Date(transaction.date))}",
                     fontSize = 14.sp,
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
             }
             
             IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Xóa", tint = Color.Red, modifier = Modifier.size(20.dp))
+                Icon(
+                    Icons.Default.Delete, 
+                    contentDescription = "Xóa", 
+                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f), 
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
     }

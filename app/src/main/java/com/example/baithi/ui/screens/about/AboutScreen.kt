@@ -48,13 +48,12 @@ fun AboutScreen(
     }
 
     Scaffold(
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             CenterAlignedTopAppBar(
                 title = { 
                     Text(
                         "Giới thiệu",
-                        color = Color.White,
                         fontWeight = FontWeight.Bold
                     ) 
                 },
@@ -62,15 +61,14 @@ fun AboutScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.Default.ArrowBack, 
-                            contentDescription = "Back",
-                            tint = Color.White
+                            contentDescription = "Back"
                         )
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color(0xFF03A9F4),
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         }
@@ -87,17 +85,17 @@ fun AboutScreen(
                 "Ứng dụng Quản lý Thu Chi Cá Nhân", 
                 fontSize = 24.sp, 
                 fontWeight = FontWeight.Bold,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onBackground
             )
-            Text("Phiên bản 1.0.0", fontSize = 18.sp, color = Color.Black)
+            Text("Phiên bản 1.0.0", fontSize = 18.sp, color = MaterialTheme.colorScheme.onBackground)
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            Text("Thành viên nhóm:", fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
-            Text("1. Nguyễn Hồng Việt", fontSize = 18.sp, color = Color.Black)
-            Text("2. Nguyễn Thành Chung", fontSize = 18.sp, color = Color.Black)
-            Text("3. Nguyễn Minh Tuấn", fontSize = 18.sp, color = Color.Black)
-            Text("4. Hoàng Anh Vũ", fontSize = 18.sp, color = Color.Black)
+            Text("Thành viên nhóm:", fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
+            Text("1. Nguyễn Hồng Việt", fontSize = 18.sp, color = MaterialTheme.colorScheme.onBackground)
+            Text("2. Nguyễn Thành Chung", fontSize = 18.sp, color = MaterialTheme.colorScheme.onBackground)
+            Text("3. Nguyễn Minh Tuấn", fontSize = 18.sp, color = MaterialTheme.colorScheme.onBackground)
+            Text("4. Hoàng Anh Vũ", fontSize = 18.sp, color = MaterialTheme.colorScheme.onBackground)
             
             Spacer(modifier = Modifier.height(32.dp))
             
@@ -107,11 +105,11 @@ fun AboutScreen(
                     viewModel?.exportToJson(context)
                 },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF03A9F4))
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Icon(Icons.Default.Share, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Xuất dữ liệu JSON", color = Color.White)
+                Text("Xuất dữ liệu JSON")
             }
 
             // Nút Nhập dữ liệu JSON
@@ -120,11 +118,11 @@ fun AboutScreen(
                     importLauncher.launch("application/json")
                 },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF03A9F4))
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Icon(Icons.Default.Description, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Nhập dữ liệu JSON", color = Color.White)
+                Text("Nhập dữ liệu JSON")
             }
 
             Button(
@@ -139,11 +137,11 @@ fun AboutScreen(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF03A9F4))
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Icon(Icons.Default.Description, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Xem hướng dẫn sử dụng (PDF)", color = Color.White)
+                Text("Xem hướng dẫn sử dụng (PDF)")
             }
         }
     }

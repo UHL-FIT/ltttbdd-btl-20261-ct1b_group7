@@ -84,19 +84,19 @@ fun AddTransactionContent(
     val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(if (transaction == null) "Thêm giao dịch" else "Sửa giao dịch", color = Color.White, fontWeight = FontWeight.Bold) },
+                title = { Text(if (transaction == null) "Thêm giao dịch" else "Sửa giao dịch", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color(0xFF03A9F4),
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         },
@@ -112,19 +112,19 @@ fun AddTransactionContent(
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
-                border = BorderStroke(1.dp, Color(0xFF03A9F4)),
-                color = Color.White
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                color = MaterialTheme.colorScheme.surface
             ) {
                 TabRow(
                     selectedTabIndex = selectedTabIndex,
                     containerColor = Color.Transparent,
-                    contentColor = Color(0xFF03A9F4),
+                    contentColor = MaterialTheme.colorScheme.primary,
                     divider = {},
                     indicator = { tabPositions ->
                         if (selectedTabIndex < tabPositions.size) {
                             TabRowDefaults.SecondaryIndicator(
                                 Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                                color = Color(0xFF03A9F4)
+                                color = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
@@ -139,7 +139,7 @@ fun AddTransactionContent(
                         text = { 
                             Text(
                                 "THU NHẬP", 
-                                color = Color.Black, 
+                                color = MaterialTheme.colorScheme.onSurface, 
                                 fontWeight = if (selectedTabIndex == 0) FontWeight.Bold else FontWeight.Normal
                             ) 
                         }
@@ -154,7 +154,7 @@ fun AddTransactionContent(
                         text = { 
                             Text(
                                 "CHI TIÊU", 
-                                color = Color.Black, 
+                                color = MaterialTheme.colorScheme.onSurface, 
                                 fontWeight = if (selectedTabIndex == 1) FontWeight.Bold else FontWeight.Normal
                             ) 
                         }
@@ -168,15 +168,14 @@ fun AddTransactionContent(
                     title = it
                     titleError = it.isBlank()
                 },
-                label = { Text("Tiêu đề", color = Color.Black) },
+                label = { Text("Tiêu đề") },
                 isError = titleError,
                 modifier = Modifier.fillMaxWidth(),
-                supportingText = { if (titleError) Text("Tiêu đề không được để trống", color = Color.Red) },
+                supportingText = { if (titleError) Text("Tiêu đề không được để trống", color = MaterialTheme.colorScheme.error) },
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color.Black,
-                    unfocusedTextColor = Color.Black,
-                    focusedLabelColor = Color.Black,
-                    unfocusedLabelColor = Color.Black
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    errorBorderColor = MaterialTheme.colorScheme.error
                 )
             )
 
@@ -186,22 +185,21 @@ fun AddTransactionContent(
                     amount = it
                     amountError = it.toDoubleOrNull() == null || it.toDouble() <= 0
                 },
-                label = { Text("Số tiền", color = Color.Black) },
+                label = { Text("Số tiền") },
                 isError = amountError,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth(),
-                supportingText = { if (amountError) Text("Vui lòng nhập số tiền hợp lệ (> 0)", color = Color.Red) },
+                supportingText = { if (amountError) Text("Vui lòng nhập số tiền hợp lệ (> 0)", color = MaterialTheme.colorScheme.error) },
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color.Black,
-                    unfocusedTextColor = Color.Black,
-                    focusedLabelColor = Color.Black,
-                    unfocusedLabelColor = Color.Black
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    errorBorderColor = MaterialTheme.colorScheme.error
                 )
             )
 
             Text(
                 "Danh mục",
-                color = if (categoryError) Color.Red else Color.Black,
+                color = if (categoryError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold
             )
             
@@ -218,7 +216,7 @@ fun AddTransactionContent(
                             selectedCategoryName = name
                             categoryError = false
                         },
-                        label = { Text(name, color = Color.Black) }
+                        label = { Text(name) }
                     )
                 }
                 FilterChip(
@@ -227,7 +225,7 @@ fun AddTransactionContent(
                         selectedCategoryName = "Khác"
                         categoryError = false
                     },
-                    label = { Text("Khác", color = Color.Black) }
+                    label = { Text("Khác") }
                 )
             }
             
@@ -238,15 +236,14 @@ fun AddTransactionContent(
                         customCategoryName = it
                         customCategoryError = it.isBlank()
                     },
-                    label = { Text("Tên danh mục tự nhập", color = Color.Black) },
+                    label = { Text("Tên danh mục tự nhập") },
                     isError = customCategoryError,
                     modifier = Modifier.fillMaxWidth(),
-                    supportingText = { if (customCategoryError) Text("Vui lòng nhập tên danh mục", color = Color.Red) },
+                    supportingText = { if (customCategoryError) Text("Vui lòng nhập tên danh mục", color = MaterialTheme.colorScheme.error) },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
-                        focusedLabelColor = Color.Black,
-                        unfocusedLabelColor = Color.Black
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        errorBorderColor = MaterialTheme.colorScheme.error
                     )
                 )
             }
@@ -254,7 +251,7 @@ fun AddTransactionContent(
             if (categoryError) {
                 Text(
                     "Vui lòng chọn một danh mục",
-                    color = Color.Red,
+                    color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -262,13 +259,11 @@ fun AddTransactionContent(
             OutlinedTextField(
                 value = note,
                 onValueChange = { note = it },
-                label = { Text("Ghi chú (tùy chọn)", color = Color.Black) },
+                label = { Text("Ghi chú (tùy chọn)") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color.Black,
-                    unfocusedTextColor = Color.Black,
-                    focusedLabelColor = Color.Black,
-                    unfocusedLabelColor = Color.Black
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
                 )
             )
 
@@ -298,9 +293,9 @@ fun AddTransactionContent(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF03A9F4))
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
-                Text(if (transaction == null) "Lưu giao dịch" else "Cập nhật thay đổi", color = Color.White)
+                Text(if (transaction == null) "Lưu giao dịch" else "Cập nhật thay đổi")
             }
         }
     }
