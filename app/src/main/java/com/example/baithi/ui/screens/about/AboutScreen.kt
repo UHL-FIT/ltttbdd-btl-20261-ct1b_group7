@@ -115,7 +115,7 @@ fun AboutScreen(
             // Nút Nhập dữ liệu JSON
             Button(
                 onClick = {
-                    importLauncher.launch("application/json")
+                    importLauncher.launch("*/*")
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)

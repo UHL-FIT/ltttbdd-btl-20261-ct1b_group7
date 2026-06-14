@@ -96,8 +96,18 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
 
     fun clearAllTransactions() {
         viewModelScope.launch(Dispatchers.IO) {
-            _uiState.value.transactions.forEach {
+            val transactionsToDelete = _uiState.value.transactions
+            if (transactionsToDelete.isEmpty()) {
+                withContext(Dispatchers.Main) {
+                    android.widget.Toast.makeText(getApplication(), "Không có giao dịch nào để xóa", android.widget.Toast.LENGTH_SHORT).show()
+                }
+                return@launch
+            }
+            transactionsToDelete.forEach {
                 repository.deleteTransaction(it)
+            }
+            withContext(Dispatchers.Main) {
+                android.widget.Toast.makeText(getApplication(), "Đã xóa tất cả giao dịch trong tháng", android.widget.Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -106,6 +116,9 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
         viewModelScope.launch(Dispatchers.IO) {
             val transaction = Transaction(title = title, amount = amount, date = date, categoryId = categoryId, note = note)
             repository.insertTransaction(transaction)
+            withContext(Dispatchers.Main) {
+                android.widget.Toast.makeText(getApplication(), "Đã thêm giao dịch thành công", android.widget.Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -119,6 +132,9 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
             }
             val transaction = Transaction(title = title, amount = amount, date = date, categoryId = catId, note = note)
             repository.insertTransaction(transaction)
+            withContext(Dispatchers.Main) {
+                android.widget.Toast.makeText(getApplication(), "Đã thêm giao dịch thành công", android.widget.Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -126,6 +142,9 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
         viewModelScope.launch(Dispatchers.IO) {
             val transaction = Transaction(id = id, title = title, amount = amount, date = date, categoryId = categoryId, note = note)
             repository.updateTransaction(transaction)
+            withContext(Dispatchers.Main) {
+                android.widget.Toast.makeText(getApplication(), "Đã cập nhật giao dịch", android.widget.Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -139,12 +158,18 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
             }
             val transaction = Transaction(id = id, title = title, amount = amount, date = date, categoryId = catId, note = note)
             repository.updateTransaction(transaction)
+            withContext(Dispatchers.Main) {
+                android.widget.Toast.makeText(getApplication(), "Đã cập nhật giao dịch", android.widget.Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
     fun deleteTransaction(transaction: Transaction) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.deleteTransaction(transaction)
+            withContext(Dispatchers.Main) {
+                android.widget.Toast.makeText(getApplication(), "Đã xóa giao dịch", android.widget.Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -154,22 +179,21 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
                 val transactions = _uiState.value.transactions
                 val categories = _uiState.value.categories
                 
-                // Manual JSON construction to avoid adding new dependencies if not present
-                val jsonBuilder = StringBuilder("[\n")
-                transactions.forEachIndexed { index, t ->
+                val jsonArray = org.json.JSONArray()
+                transactions.forEach { t ->
                     val cat = categories.find { it.id == t.categoryId }
-                    jsonBuilder.append("  {\n")
-                    jsonBuilder.append("    \"title\": \"${t.title}\",\n")
-                    jsonBuilder.append("    \"amount\": ${t.amount},\n")
-                    jsonBuilder.append("    \"date\": ${t.date},\n")
-                    jsonBuilder.append("    \"category\": \"${cat?.name ?: "Khác"}\",\n")
-                    jsonBuilder.append("    \"isExpense\": ${cat?.isExpense ?: true},\n")
-                    jsonBuilder.append("    \"note\": \"${t.note ?: ""}\"\n")
-                    jsonBuilder.append("  }${if (index < transactions.size - 1) "," else ""}\n")
+                    val obj = org.json.JSONObject().apply {
+                        put("title", t.title)
+                        put("amount", t.amount)
+                        put("date", t.date)
+                        put("category", cat?.name ?: "Khác")
+                        put("isExpense", cat?.isExpense ?: true)
+                        put("note", t.note ?: org.json.JSONObject.NULL)
+                    }
+                    jsonArray.put(obj)
                 }
-                jsonBuilder.append("]")
                 
-                val jsonString = jsonBuilder.toString()
+                val jsonString = jsonArray.toString(2)
                 
                 withContext(Dispatchers.Main) {
                     val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
@@ -179,6 +203,7 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
                     val chooser = android.content.Intent.createChooser(shareIntent, "Xuất dữ liệu JSON")
                     chooser.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
                     context.startActivity(chooser)
+                    android.widget.Toast.makeText(context, "Đã chuẩn bị dữ liệu JSON để chia sẻ", android.widget.Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
@@ -192,6 +217,7 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val jsonArray = org.json.JSONArray(jsonString)
+                val allCategories = repository.getAllCategories().first().toMutableList()
                 var count = 0
                 for (i in 0 until jsonArray.length()) {
                     val obj = jsonArray.getJSONObject(i)
@@ -203,12 +229,17 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
                     val note = if (obj.isNull("note")) null else obj.getString("note")
 
                     // Tìm hoặc tạo category
-                    val existing = repository.getAllCategories().first().find { 
+                    val existing = allCategories.find { 
                         it.name.equals(categoryName, true) && it.isExpense == isExpense 
                     }
-                    val catId: Long = existing?.id ?: repository.insertCategory(
-                        Category(name = categoryName, iconName = "category", isExpense = isExpense)
-                    )
+                    val catId: Long = if (existing != null) {
+                        existing.id
+                    } else {
+                        val newCat = Category(name = categoryName, iconName = "category", isExpense = isExpense)
+                        val id = repository.insertCategory(newCat)
+                        allCategories.add(newCat.copy(id = id))
+                        id
+                    }
 
                     val transaction = Transaction(title = title, amount = amount, date = date, categoryId = catId, note = note)
                     repository.insertTransaction(transaction)

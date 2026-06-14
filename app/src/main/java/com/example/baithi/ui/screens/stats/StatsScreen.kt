@@ -147,6 +147,9 @@ fun StatsContent(
                 AlertDialog(
                     onDismissRequest = { showMonthPicker = false },
                     title = { Text("Chọn Thời Gian") },
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    textContentColor = MaterialTheme.colorScheme.onSurface,
                     text = {
                         Column {
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
@@ -217,6 +220,9 @@ fun StatsContent(
                 AlertDialog(
                     onDismissRequest = { showTransactionList = false },
                     title = { Text("Danh sách giao dịch tháng", fontWeight = FontWeight.Bold) },
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    textContentColor = MaterialTheme.colorScheme.onSurface,
                     text = {
                         Box(modifier = Modifier.heightIn(max = 400.dp)) {
                             if (uiState.transactions.isEmpty()) {
@@ -250,7 +256,10 @@ fun StatsContent(
                                             )
                                         }
                                         if (index < uiState.transactions.size - 1) {
-                                            HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray)
+                                            HorizontalDivider(
+                                                thickness = 0.5.dp, 
+                                                color = MaterialTheme.colorScheme.outlineVariant
+                                            )
                                         }
                                     }
                                 }
