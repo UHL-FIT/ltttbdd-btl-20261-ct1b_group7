@@ -9,6 +9,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -36,11 +38,41 @@ fun StatsContent(
 ) {
     var showMonthPicker by remember { mutableStateOf(false) }
     var showTransactionList by remember { mutableStateOf(false) }
+    var showCategoryStatsDialog by remember { mutableStateOf(false) }
+    var showDeleteAllDialog by remember { mutableStateOf(false) }
+    var selectedFilterIndex by remember { mutableIntStateOf(0) } // 0: Chi tiêu, 1: Thu nhập
+    val filters = listOf("Chi tiêu", "Thu nhập")
+    
     val months = listOf("Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", 
                         "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12")
     
     val currentYear = Calendar.getInstance().get(Calendar.YEAR)
     val years = (currentYear - 5..currentYear + 5).toList()
+
+    if (showDeleteAllDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteAllDialog = false },
+            title = { Text("Xác nhận xóa tất cả") },
+            text = { Text("Bạn có chắc chắn muốn xóa tất cả giao dịch không? Hành động này không thể hoàn tác.") },
+            icon = { Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Red) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onDeleteAll()
+                        showDeleteAllDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Có")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteAllDialog = false }) {
+                    Text("Không")
+                }
+            }
+        )
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -48,7 +80,7 @@ fun StatsContent(
             CenterAlignedTopAppBar(
                 title = { 
                     Text(
-                        "Thống kê báo cáo",
+                        "Thống Kê Thu Chi ",
                         fontWeight = FontWeight.Bold
                     ) 
                 },
@@ -61,11 +93,11 @@ fun StatsContent(
                     }
                 },
                 actions = {
-                    TextButton(onClick = onDeleteAll) {
+                    TextButton(onClick = { showDeleteAllDialog = true }) {
                         Text("Xoá tất cả", color = MaterialTheme.colorScheme.onPrimary)
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
@@ -216,6 +248,43 @@ fun StatsContent(
                 modifier = Modifier.clickable { showTransactionList = true }
             )
 
+            // Bộ lọc Chi tiêu / Thu nhập (Combobox-like filter)
+            var expandedFilter by remember { mutableStateOf(false) }
+            Box(modifier = Modifier.fillMaxWidth()) {
+                OutlinedCard(
+                    onClick = { expandedFilter = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Loại thống kê: ${filters[selectedFilterIndex]}",
+                            fontWeight = FontWeight.Medium
+                        )
+                        Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                    }
+                }
+                DropdownMenu(
+                    expanded = expandedFilter,
+                    onDismissRequest = { expandedFilter = false },
+                    modifier = Modifier.fillMaxWidth(0.9f)
+                ) {
+                    filters.forEachIndexed { index, filter ->
+                        DropdownMenuItem(
+                            text = { Text(filter) },
+                            onClick = {
+                                selectedFilterIndex = index
+                                expandedFilter = false
+                            }
+                        )
+                    }
+                }
+            }
+
             if (showTransactionList) {
                 AlertDialog(
                     onDismissRequest = { showTransactionList = false },
@@ -273,9 +342,126 @@ fun StatsContent(
                     }
                 )
             }
-            StatItem("Trung bình tháng", String.format("%,.0f đ", uiState.avgTransaction))
-            StatItem("Lớn nhất tháng", String.format("%,.0f đ", uiState.maxTransaction), Color(0xFF2E7D32))
-            StatItem("Nhỏ nhất tháng", String.format("%,.0f đ", uiState.minTransaction), MaterialTheme.colorScheme.error)
+
+            // Tab hoặc tiêu đề phân biệt Thu nhập / Chi tiêu
+            HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+            
+            if (selectedFilterIndex == 0) {
+                // --- PHẦN CHI TIÊU ---
+                Text(
+                    "Thống kê Chi tiêu", 
+                    fontSize = 18.sp, 
+                    fontWeight = FontWeight.Bold, 
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f))
+                ) {
+                    Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        StatItem("Tổng chi", String.format("%,.0f đ", uiState.totalExpense), MaterialTheme.colorScheme.error)
+                        StatItem("Trung bình", String.format("%,.0f đ", uiState.avgExpense))
+                        StatItem("Lớn nhất", String.format("%,.0f đ", uiState.maxExpense))
+                        StatItem("Nhỏ nhất", String.format("%,.0f đ", uiState.minExpense))
+                    }
+                }
+            } else {
+                // --- PHẦN THU NHẬP ---
+                Text(
+                    "Thống kê Thu nhập", 
+                    fontSize = 18.sp, 
+                    fontWeight = FontWeight.Bold, 
+                    color = Color(0xFF2E7D32),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF2E7D32).copy(alpha = 0.1f))
+                ) {
+                    Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        StatItem("Tổng thu", String.format("%,.0f đ", uiState.totalIncome), Color(0xFF2E7D32))
+                        StatItem("Trung bình", String.format("%,.0f đ", uiState.avgIncome))
+                        StatItem("Lớn nhất", String.format("%,.0f đ", uiState.maxIncome))
+                        StatItem("Nhỏ nhất", String.format("%,.0f đ", uiState.minIncome))
+                    }
+                }
+            }
+
+            // --- THỐNG KÊ THEO DANH MỤC ---
+            HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+            OutlinedCard(
+                onClick = { showCategoryStatsDialog = true },
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "Xem chi tiết theo danh mục", 
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                }
+            }
+
+            if (showCategoryStatsDialog) {
+                var dialogFilterIndex by remember { mutableIntStateOf(selectedFilterIndex) }
+                AlertDialog(
+                    onDismissRequest = { showCategoryStatsDialog = false },
+                    title = { Text("Thống kê theo danh mục", fontWeight = FontWeight.Bold) },
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    textContentColor = MaterialTheme.colorScheme.onSurface,
+                    text = {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            TabRow(
+                                selectedTabIndex = dialogFilterIndex,
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                contentColor = MaterialTheme.colorScheme.primary
+                            ) {
+                                Tab(
+                                    selected = dialogFilterIndex == 0,
+                                    onClick = { dialogFilterIndex = 0 },
+                                    text = { Text("Chi tiêu") }
+                                )
+                                Tab(
+                                    selected = dialogFilterIndex == 1,
+                                    onClick = { dialogFilterIndex = 1 },
+                                    text = { Text("Thu nhập") }
+                                )
+                            }
+                            
+                            Box(modifier = Modifier.heightIn(max = 400.dp)) {
+                                val filteredStats = uiState.categoryStats.filter { it.isExpense == (dialogFilterIndex == 0) }
+                                if (filteredStats.isEmpty()) {
+                                    Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                                        Text("Không có dữ liệu trong tháng này", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
+                                } else {
+                                    androidx.compose.foundation.lazy.LazyColumn(
+                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                        contentPadding = PaddingValues(vertical = 8.dp)
+                                    ) {
+                                        items(filteredStats.size) { index ->
+                                            CategoryStatItem(filteredStats[index])
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { showCategoryStatsDialog = false }) {
+                            Text("Đóng")
+                        }
+                    }
+                )
+            }
             
             HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
             
@@ -372,6 +558,39 @@ fun StatsScreen(
     )
 }
 
+@Composable
+fun CategoryStatItem(stat: com.example.baithi.ui.viewmodel.CategoryStat) {
+    val color = if (stat.isExpense) MaterialTheme.colorScheme.error else Color(0xFF2E7D32)
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(stat.categoryName, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(
+                    text = String.format("%,.0f đ", stat.total),
+                    color = color,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Trung bình: ${String.format("%,.0f đ", stat.avg)}", fontSize = 12.sp)
+                Text("Giao dịch: ${stat.count}", fontSize = 12.sp)
+            }
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun StatsPreview() {
@@ -379,11 +598,14 @@ fun StatsPreview() {
         StatsContent(
             uiState = TransactionUiState(
                 transactions = List(5) { mockTransaction },
-                avgTransaction = 50000.0,
-                maxTransaction = 100000.0,
-                minTransaction = 10000.0,
                 totalIncome = 200000.0,
                 totalExpense = 50000.0,
+                avgIncome = 40000.0,
+                maxIncome = 100000.0,
+                minIncome = 10000.0,
+                avgExpense = 10000.0,
+                maxExpense = 20000.0,
+                minExpense = 5000.0,
                 selectedMonth = 4,
                 selectedYear = 2024
             ),

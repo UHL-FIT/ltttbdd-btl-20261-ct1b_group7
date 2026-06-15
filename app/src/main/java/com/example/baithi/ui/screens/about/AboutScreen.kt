@@ -65,7 +65,7 @@ fun AboutScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
@@ -124,16 +124,25 @@ fun AboutScreen(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Nhập dữ liệu JSON")
             }
-
+            // Nút Xem hướng dẫn sử dụng (Cách 2: Mở qua link Online)
             Button(
                 onClick = {
-                    // Giả lập mở file PDF hướng dẫn sử dụng
+                    // 1. Thay link PDF thật của bạn vào đây (Google Drive, host riêng, v.v.)
+                    val pdfUrl = "https://drive.google.com/file/d/12n_rSlWLe-v8YLc32wu2sE8NKnx4wqUE/view?usp=drive_link"
+
                     try {
-                        val intent = Intent(Intent.ACTION_VIEW)
-                        intent.setDataAndType(Uri.parse("https://www.example.com/guide.pdf"), "application/pdf")
+                        // 2. Tạo Intent mở URL
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
+
+                        // 3. Kiểm tra và mở ứng dụng phù hợp (Trình duyệt hoặc trình đọc PDF)
                         context.startActivity(intent)
                     } catch (e: Exception) {
-                        // Handle case where no PDF app is installed
+                        // 4. Thông báo nếu máy không có ứng dụng nào mở được link/PDF
+                        android.widget.Toast.makeText(
+                            context,
+                            "Không tìm thấy ứng dụng để mở tài liệu",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),

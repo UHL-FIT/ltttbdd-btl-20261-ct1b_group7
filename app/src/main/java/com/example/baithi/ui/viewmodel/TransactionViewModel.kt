@@ -61,35 +61,67 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
                     totalIncome = 0.0,
                     totalExpense = 0.0,
                     balance = 0.0,
-                    avgTransaction = 0.0,
-                    maxTransaction = 0.0,
-                    minTransaction = 0.0
+                    avgIncome = 0.0,
+                    maxIncome = 0.0,
+                    minIncome = 0.0,
+                    avgExpense = 0.0,
+                    maxExpense = 0.0,
+                    minExpense = 0.0,
+                    categoryStats = emptyList()
                 ) 
             }
             return
         }
 
-        val income = transactions.filter { t -> 
+        // Tách riêng Thu nhập và Chi tiêu
+        val incomeTransactions = transactions.filter { t -> 
             categories.find { it.id == t.categoryId }?.isExpense == false 
-        }.sumOf { it.amount }
+        }
         
-        val expense = transactions.filter { t -> 
+        val expenseTransactions = transactions.filter { t -> 
             categories.find { it.id == t.categoryId }?.isExpense == true 
-        }.sumOf { it.amount }
+        }
 
-        val avg = if (transactions.isNotEmpty()) transactions.map { it.amount }.average() else 0.0
-        val max = if (transactions.isNotEmpty()) transactions.maxOf { it.amount } else 0.0
-        val min = if (transactions.isNotEmpty()) transactions.minOf { it.amount } else 0.0
+        val totalIncome = incomeTransactions.sumOf { it.amount }
+        val totalExpense = expenseTransactions.sumOf { it.amount }
+
+        // Thống kê thu nhập
+        val avgIncome = if (incomeTransactions.isNotEmpty()) incomeTransactions.map { it.amount }.average() else 0.0
+        val maxIncome = if (incomeTransactions.isNotEmpty()) incomeTransactions.maxOf { it.amount } else 0.0
+        val minIncome = if (incomeTransactions.isNotEmpty()) incomeTransactions.minOf { it.amount } else 0.0
+
+        // Thống kê chi tiêu
+        val avgExpense = if (expenseTransactions.isNotEmpty()) expenseTransactions.map { it.amount }.average() else 0.0
+        val maxExpense = if (expenseTransactions.isNotEmpty()) expenseTransactions.maxOf { it.amount } else 0.0
+        val minExpense = if (expenseTransactions.isNotEmpty()) expenseTransactions.minOf { it.amount } else 0.0
+
+        // Thống kê theo từng danh mục
+        val categoryStats = transactions.groupBy { it.categoryId }.map { (catId, transList) ->
+            val cat = categories.find { it.id == catId }
+            CategoryStat(
+                categoryName = cat?.name ?: "Khác",
+                isExpense = cat?.isExpense ?: true,
+                total = transList.sumOf { it.amount },
+                avg = transList.map { it.amount }.average(),
+                max = transList.maxOf { it.amount },
+                min = transList.minOf { it.amount },
+                count = transList.size
+            )
+        }.sortedByDescending { it.total }
 
         _uiState.update { 
             it.copy(
                 transactions = transactions,
-                totalIncome = income,
-                totalExpense = expense,
-                balance = income - expense,
-                avgTransaction = avg,
-                maxTransaction = max,
-                minTransaction = min
+                totalIncome = totalIncome,
+                totalExpense = totalExpense,
+                balance = totalIncome - totalExpense,
+                avgIncome = avgIncome,
+                maxIncome = maxIncome,
+                minIncome = minIncome,
+                avgExpense = avgExpense,
+                maxExpense = maxExpense,
+                minExpense = minExpense,
+                categoryStats = categoryStats
             ) 
         }
     }

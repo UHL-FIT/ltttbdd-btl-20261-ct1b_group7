@@ -1,7 +1,6 @@
 package com.example.baithi.ui.screens.home
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -10,19 +9,21 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.UploadFile
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -46,17 +47,45 @@ fun ManHinhChinhContent(
     onXuatDuLieu: () -> Unit,
     onXoaGiaoDich: (Transaction) -> Unit,
 ) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var transactionToDelete by remember { mutableStateOf<Transaction?>(null) }
+
+    if (showDeleteDialog && transactionToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Xác nhận xóa") },
+            text = { Text("Bạn có chắc chắn muốn xóa giao dịch \"${transactionToDelete?.title}\" không?") },
+            icon = { Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Red) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        transactionToDelete?.let { onXoaGiaoDich(it) }
+                        showDeleteDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Có")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Không")
+                }
+            }
+        )
+    }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Quản lí chi tiêu", fontWeight = FontWeight.Bold) },
+                title = { Text("Quản Lí Thu Chi ", fontWeight = FontWeight.Bold) },
                 actions = {
                     IconButton(onClick = onXuatDuLieu) {
                         Icon(Icons.Default.UploadFile, contentDescription = "Xuất JSON")
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
                     actionIconContentColor = MaterialTheme.colorScheme.onPrimary
@@ -141,7 +170,10 @@ fun ManHinhChinhContent(
                             transaction = transaction,
                             category = category,
                             onClick = { onSuaGiaoDich(transaction) },
-                            onDelete = { onXoaGiaoDich(transaction) }
+                            onDelete = { 
+                                transactionToDelete = transaction
+                                showDeleteDialog = true 
+                            }
                         )
                     }
                 }
@@ -216,8 +248,6 @@ fun ManHinhChinhPreview() {
 
 @Composable
 fun TheTongQuan(thuNhap: Double, chiTieu: Double, soDu: Double) {
-    val progress = if (thuNhap > 0) (chiTieu / thuNhap).coerceIn(0.0, 1.0).toFloat() else 0f
-    
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -345,10 +375,10 @@ fun DongGiaoDich(
             
             IconButton(onClick = onDelete) {
                 Icon(
-                    Icons.Default.Delete, 
+                    Icons.Default.Delete,
                     contentDescription = "Xóa", 
-                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f), 
-                    modifier = Modifier.size(20.dp)
+                    tint = Color.Red, 
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
